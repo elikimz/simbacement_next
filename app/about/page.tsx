@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/app/components/layout/Header";
-import { Footer } from "@/app/components/layout/Footer";
 import { generateOrganizationSchema } from "@/app/lib/structured-data";
 
 export const metadata: Metadata = {
@@ -24,7 +22,6 @@ export default function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <Header />
       <main className="max-w-7xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">About Simba Cement</h1>
 
@@ -161,7 +158,6 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Header } from "@/app/components/layout/Header";
-import { Footer } from "@/app/components/layout/Footer";
 import { ContactForm } from "@/app/components/auth/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact Us - Get in Touch",
-  description: "Contact Simba Cement for inquiries, support, or feedback.",
+  description: "Contact Simba Cement for inquiries, support, or feedback regarding our premium building materials.",
 };
 
 export default function ContactPage() {
+  const phoneNumber = "+254731030404";
+  const whatsappNumber = "254731030404";
+  const email = "simbacement775@gmail.com";
+
   return (
     <div className="min-h-screen bg-white">
-      <Header />
       <main className="max-w-7xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">
           Contact Us
@@ -37,8 +38,8 @@ export default function ContactPage() {
                   Phone
                 </h3>
                 <p className="text-gray-600">
-                  <a href="tel:+254700000000" className="hover:text-red-600">
-                    +254 700 000 000
+                  <a href={`tel:${phoneNumber}`} className="hover:text-red-600 transition-colors">
+                    {phoneNumber}
                   </a>
                 </p>
               </div>
@@ -48,8 +49,8 @@ export default function ContactPage() {
                   Email
                 </h3>
                 <p className="text-gray-600">
-                  <a href="mailto:info@simbacement.com" className="hover:text-red-600">
-                    info@simbacement.com
+                  <a href={`mailto:${email}`} className="hover:text-red-600 transition-colors">
+                    {email}
                   </a>
                 </p>
               </div>
@@ -65,8 +66,8 @@ export default function ContactPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Business Hours
                 </h3>
-                <p className="text-gray-600">Monday - Friday: 8:00 AM - 5:00 PM</p>
-                <p className="text-gray-600">Saturday: 9:00 AM - 1:00 PM</p>
+                <p className="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
+                <p className="text-gray-600">Saturday: 9:00 AM - 3:00 PM</p>
                 <p className="text-gray-600">Sunday: Closed</p>
               </div>
 
@@ -76,8 +77,10 @@ export default function ContactPage() {
                 </h3>
                 <p className="text-gray-600">
                   <a
-                    href="https://wa.me/254700000000"
-                    className="hover:text-red-600"
+                    href={`https://wa.me/${whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-red-600 transition-colors"
                   >
                     Chat with us on WhatsApp
                   </a>
@@ -87,7 +90,6 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

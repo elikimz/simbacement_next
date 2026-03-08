@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Hero } from "@/app/components/home/Hero";
 import { FeatureStrip } from "@/app/components/home/FeatureStrip";
 import { AboutSection } from "@/app/components/home/AboutSection";
@@ -8,37 +7,54 @@ import { WhyMaisha } from "@/app/components/home/WhyMaisha";
 import { PromoBanner } from "@/app/components/home/PromoBanner";
 import { TestimonialsIntro } from "@/app/components/home/TestimonialsIntro";
 import { TestimonialsSection } from "@/app/components/home/TestimonialsSection";
-import { Header } from "@/app/components/layout/Header";
-import { Footer } from "@/app/components/layout/Footer";
+import { bannersAPI, productsAPI, dealsAPI } from "@/app/lib/api";
 
-export const metadata: Metadata = {
-  title: "Home - Premium Building Materials & Roofing Solutions",
-  description:
-    "Discover Simba Cement's premium selection of galvanized and color steel roofing sheets, cement, and building materials. Trusted quality for your construction projects.",
-  openGraph: {
-    title: "Simba Cement - Home",
-    description:
-      "Premium building materials and roofing solutions for your construction needs.",
-    type: "website",
-  },
+export const metadata = {
+  title: "Simba Cement | Premium Building Materials in Kenya",
+  description: "Your trusted supplier for genuine Simba Cement, steel roofing sheets, and quality construction materials. Fast delivery across Kenya.",
 };
 
-export default function HomePage() {
+async function getHomeData() {
+  try {
+    const [bannersRes, productsRes, latestDealRes] = await Promise.all([
+      bannersAPI.getActive(),
+      productsAPI.getAll(),
+      dealsAPI.getLatest().catch(() => ({ data: null })),
+    ]);
+
+    return {
+      banners: bannersRes.data || [],
+      products: productsRes.data || [],
+      latestDeal: latestDealRes.data,
+    };
+  } catch (error) {
+    console.error("Error fetching home data:", error);
+    return {
+      banners: [],
+      products: [],
+      latestDeal: null,
+    };
+  }
+}
+
+export default async function HomePage() {
+  const { banners, products, latestDeal } = await getHomeData();
+
   return (
     <div className="min-h-screen bg-white">
-      <Header />
       <main>
-        <Hero />
+        <div className="mx-auto max-w-[1400px] px-6">
+          <Hero banners={banners} />
+        </div>
         <FeatureStrip />
-        <AboutSection />
-        <DealsSection />
-        <ProductsShowcase />
-        <WhyMaisha />
-        <PromoBanner />
+        <AboutSection banners={banners} />
+        <DealsSection deal={latestDeal} />
+        <ProductsShowcase products={products} />
+        <WhyMaisha banners={banners} />
+        <PromoBanner banners={banners} />
         <TestimonialsIntro />
         <TestimonialsSection />
       </main>
-      <Footer />
     </div>
   );
 }

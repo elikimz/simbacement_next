@@ -1,35 +1,69 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Banner } from "../../lib/api";
 
-type Slide = {
-  id: string;
-  image: string;
-  title: string;
-  description: string;
-};
+interface HeroProps {
+  banners: Banner[];
+}
 
-const FALLBACK_SLIDES: Slide[] = [
-  {
-    id: "1",
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200&h=600&fit=crop",
-    title: "Sheltering You\nToday & Tomorrow",
-    description:
-      "High quality galvanized and color steel roofing sheets with durable lifespan for a trusted shelter.",
-  },
-  {
-    id: "2",
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200&h=600&fit=crop",
-    title: "Premium Cement\nFor Strong Foundations",
-    description: "Trusted cement products that build lasting structures.",
-  },
-];
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200&h=600&fit=crop";
 
-export function Hero() {
+export function Hero({ banners }: HeroProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const slides = FALLBACK_SLIDES;
+
+  const slides = useMemo(() => {
+    if (!banners || banners.length === 0) {
+      return [
+        {
+          id: "fallback-1",
+          image: FALLBACK_IMAGE,
+          title: "Sheltering You\nToday & Tomorrow",
+          description:
+            "High quality galvanized and color steel roofing sheets with durable lifespan for a trusted shelter.",
+          cta_text: "Shop Now",
+          cta_href: "/products",
+        },
+      ];
+    }
+
+    const out: any[] = [];
+    for (const b of banners) {
+      const imgs = [...(b.images || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      
+      // Move primary image to front
+      const primaryIndex = imgs.findIndex(img => img.is_primary);
+      if (primaryIndex > 0) {
+        const [primary] = imgs.splice(primaryIndex, 1);
+        imgs.unshift(primary);
+      }
+
+      if (imgs.length > 0) {
+        imgs.forEach((img, idx) => {
+          out.push({
+            id: `${b.id}-${img.id || idx}`,
+            image: img.url || FALLBACK_IMAGE,
+            title: b.title || "",
+            description: b.description || "",
+            cta_text: b.cta_text || "Shop Now",
+            cta_href: b.cta_href || "/products",
+          });
+        });
+      } else {
+        out.push({
+          id: `${b.id}-fallback`,
+          image: FALLBACK_IMAGE,
+          title: b.title || "",
+          description: b.description || "",
+          cta_text: b.cta_text || "Shop Now",
+          cta_href: b.cta_href || "/products",
+        });
+      }
+    }
+    return out;
+  }, [banners]);
 
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
@@ -50,13 +84,13 @@ export function Hero() {
   };
 
   return (
-    <section className="relative w-full h-[520px] overflow-hidden rounded-3xl mx-4 md:mx-6 my-8">
+    <section className="relative w-full h-[520px] overflow-hidden rounded-3xl my-8">
       {/* Slides */}
       <div
         className="flex transition-transform duration-500 ease-in-out h-full"
         style={{ transform: `translateX(-${activeSlide * 100}%)` }}
       >
-        {slides.map((slide) => (
+        {slides.map((slide: any) => (
           <div
             key={slide.id}
             className="relative w-full h-full flex-shrink-0"
@@ -82,9 +116,12 @@ export function Hero() {
                     {slide.description}
                   </p>
                 )}
-                <button className="mt-8 px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition">
-                  Shop Now
-                </button>
+                <a 
+                  href={slide.cta_href}
+                  className="mt-8 inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+                >
+                  {slide.cta_text}
+                </a>
               </div>
             </div>
           </div>
@@ -114,7 +151,7 @@ export function Hero() {
       {/* Slide Indicators */}
       {slides.length > 1 && (
         <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 space-y-3">
-          {slides.map((_, index) => (
+          {slides.map((_: any, index: number) => (
             <button
               key={index}
               onClick={() => setActiveSlide(index)}

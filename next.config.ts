@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   // Compression and performance
   compress: true,
   poweredByHeader: false,
+  trailingSlash: true, // Better for SEO consistency
 
   // Headers for security and SEO
   async headers() {

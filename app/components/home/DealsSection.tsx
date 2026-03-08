@@ -1,33 +1,72 @@
 "use client";
 
-export function DealsSection() {
+import React, { useState, useEffect, useMemo } from "react";
+import { ProductCard } from "./ProductCard";
+import { Deal } from "../../lib/api";
+
+interface DealsSectionProps {
+  deal: Deal | null;
+}
+
+function formatCountdown(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+
+  const pad = (x: number) => String(x).padStart(2, "0");
+  return `${pad(d)} : ${pad(h)} : ${pad(m)} : ${pad(s)}`;
+}
+
+export function DealsSection({ deal }: DealsSectionProps) {
+  const [now, setNow] = useState(Date.now());
+
+  const endsAt = useMemo(() => {
+    if (!deal?.ends_at) return null;
+    const t = new Date(deal.ends_at).getTime();
+    return Number.isFinite(t) ? t : null;
+  }, [deal?.ends_at]);
+
+  useEffect(() => {
+    if (!endsAt) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [endsAt]);
+
+  if (!deal || !deal.products || deal.products.length === 0) {
+    return null;
+  }
+
+  const countdownLabel = endsAt ? formatCountdown(endsAt - now) : "00 : 00 : 00 : 00";
+
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">
-          Special Deals
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-              <div className="bg-gray-300 h-48 flex items-center justify-center">
-                <span className="text-gray-500">Product Image</span>
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Product {i}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Special offer on selected items
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-red-600">KES 5,000</span>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
+    <section className="bg-white py-16">
+      <div className="mx-auto max-w-[1400px] px-6">
+        <div className="flex flex-wrap items-center justify-between border-b pb-6">
+          <div className="flex items-center gap-6">
+            <h2 className="text-2xl font-semibold text-red-500">{deal.title}</h2>
+
+            <span className="rounded-full bg-red-500 px-6 py-2 text-sm font-semibold text-white font-mono">
+              {countdownLabel}
+            </span>
+
+            <span className="hidden text-sm text-gray-400 md:block">
+              Remains until the end of the offer
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          {deal.products.map((p) => (
+            <ProductCard 
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              image={p.image_url || ""}
+              price={p.deal_price || p.price}
+              stock={p.stock}
+            />
           ))}
         </div>
       </div>
